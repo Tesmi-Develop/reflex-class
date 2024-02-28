@@ -1,6 +1,5 @@
 import { ClassProducer } from "../class-producer";
 
-
 /**
  * Decorator for creating an Action inside a class producer.
  */
