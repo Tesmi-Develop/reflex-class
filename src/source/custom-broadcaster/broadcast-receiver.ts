@@ -1,0 +1,53 @@
+import { BroadcastAction, BroadcastReceiverOptions, Producer, ProducerMiddleware } from "@rbxts/reflex";
+import { restoreNotChangedProperties } from "../../utilities/restoreNotChangedProperties";
+import { IsHydrate } from "./hydrate";
+import { IsPatch } from "./patch";
+import { patchDifferences } from "../../utilities/patch-utilities";
+
+export const createPatchBroadcastReceiver = (options: BroadcastReceiverOptions) => {
+	let producer: Producer<object>;
+
+	const hydrateState = (serverState: object) => {
+		assert(producer, "Cannot use broadcast receiver before the middleware is applied.");
+
+		const oldState = producer.getState();
+		const nextState = table.clone(oldState);
+
+		for (const [key, value] of pairs(serverState)) {
+			nextState[key as never] = value as never;
+		}
+
+		restoreNotChangedProperties(oldState, nextState);
+		producer.setState(nextState);
+	};
+
+	const receiver = {
+		dispatch: (actions: BroadcastAction[]) => {
+			assert(producer, "Cannot use broadcast receiver before the middleware is applied.");
+
+			actions.forEach((action) => {
+				if (IsHydrate(action)) {
+					hydrateState(action.arguments[0] as object);
+				}
+
+				if (IsPatch(action)) {
+					const patch = action.arguments[0] as object;
+					next(patch) !== undefined && producer.setState(patchDifferences(producer.getState(), patch));
+				}
+			});
+		},
+
+		hydrate: (state: object) => {
+			hydrateState(state);
+		},
+
+		middleware: ((newProducer: Producer<object>) => {
+			producer = newProducer;
+			options.start();
+
+			return (dispatch) => dispatch;
+		}) as ProducerMiddleware,
+	};
+
+	return receiver;
+};

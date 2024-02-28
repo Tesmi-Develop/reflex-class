@@ -1,5 +1,5 @@
 {
-  "name": "@rbxts/package-name",
+  "name": "@rbxts/reflex-class",
   "version": "1.0.0",
   "description": "",
   "main": "out/init.lua",
@@ -33,5 +33,13 @@
     "prettier": "^3.2.4",
     "roblox-ts": "^2.2.0",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@rbxts/immut": "^0.4.4-ts.0",
+    "@rbxts/janitor": "^1.15.7-ts.0",
+    "@rbxts/reflex": "^4.3.1",
+    "@rbxts/services": "^1.5.4",
+    "@rbxts/set-timeout": "^1.1.2",
+    "@rbxts/testez": "^0.4.2-ts.0"
   }
 }

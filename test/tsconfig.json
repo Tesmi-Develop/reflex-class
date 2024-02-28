@@ -19,7 +19,7 @@
 
 		// configurable
 		"paths": {
-			"@rbxts/packageName": ["../../src"],
+			"@rbxts/reflex-class": ["../../src"],
 		},
 		"rootDirs": [
 			"src",
