@@ -1,10 +1,10 @@
-import { ClassProducer } from "../class-producer";
+import { ClassProducer, IClassProducer } from "../class-producer";
 
 /**
  * Decorator for creating an Action inside a class producer.
  */
 export const Action = () => {
-	return <S extends object, T extends ClassProducer<S>>(
+	return <S extends object, T extends IClassProducer<S>>(
 		target: T,
 		propertyKey: string,
 		descriptor: TypedPropertyDescriptor<(this: T, ...args: unknown[]) => S>,

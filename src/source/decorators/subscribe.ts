@@ -1,6 +1,6 @@
-import { ClassProducer, InferClassProducerState } from "../class-producer";
+import { ClassProducer, IClassProducer, InferClassProducerState } from "../class-producer";
 
-export const Subscribe = <T extends ClassProducer<InferClassProducerState<T>>, R>(
+export const Subscribe = <T extends IClassProducer<InferClassProducerState<T>>, R>(
 	selector: (state: InferClassProducerState<T>) => R,
 	predicate?: (state: R, previousState: R) => boolean,
 ) => {
@@ -15,9 +15,10 @@ export const Subscribe = <T extends ClassProducer<InferClassProducerState<T>>, R
 
 		Ttarget.constructor = function (this, ...args: unknown[]) {
 			const result = originalConstructor(this as never, ...args);
-			this.__GetJanitor().Add(
-				this.Subscribe(selector, predicate, (state, prev) => originalMethod(this, state, prev)),
-			);
+			const typedClass = this as unknown as ClassProducer;
+			typedClass
+				.__GetJanitor()
+				.Add(this.Subscribe(selector, predicate, (state, prev) => originalMethod(this, state, prev)));
 
 			return result;
 		};

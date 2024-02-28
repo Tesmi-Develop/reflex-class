@@ -7,7 +7,24 @@ interface Actions {
 	Dispatch: (state: unknown, newState: unknown) => unknown;
 }
 
-export abstract class ClassProducer<S extends object = object> {
+export interface IClassProducer<S extends object = object> {
+	GetState(): S;
+
+	Subscribe(listener: (state: S, previousState: S) => void): () => void;
+	Subscribe<T>(selector: (state: S) => T, listener: (state: T, previousState: T) => void): () => void;
+	Subscribe<T>(
+		selector: (state: S) => T,
+		predicate: ((state: T, previousState: T) => boolean) | undefined,
+		listener: (state: T, previousState: T) => void,
+	): () => void;
+	Subscribe<T>(...args: unknown[]): () => void;
+
+	Dispatch(newState: S): void;
+
+	Destroy(): void;
+}
+
+export abstract class ClassProducer<S extends object = object> implements IClassProducer {
 	protected abstract state: S;
 	protected producer!: Producer<S>;
 	private __janitor = new Janitor();
@@ -39,6 +56,10 @@ export abstract class ClassProducer<S extends object = object> {
 	/** @internal @hidden */
 	public __GetJanitor() {
 		return this.__janitor;
+	}
+
+	public Destroy() {
+		this.__janitor.Destroy();
 	}
 
 	private initProducer(state: S) {
@@ -77,9 +98,5 @@ export abstract class ClassProducer<S extends object = object> {
 			mt.__newindex = undefined;
 			subscriber(value as S);
 		};
-	}
-
-	public Destroy() {
-		this.__janitor.Destroy();
 	}
 }
