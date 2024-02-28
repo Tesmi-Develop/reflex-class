@@ -36,7 +36,7 @@ export abstract class ClassProducer<S extends object = object> {
 		return this.producer.Dispatch(newState);
 	}
 
-	/** @internal */
+	/** @internal @hidden */
 	public __GetJanitor() {
 		return this.__janitor;
 	}
@@ -60,14 +60,14 @@ export abstract class ClassProducer<S extends object = object> {
 		return producer;
 	}
 
-	/** @internal */
+	/** @internal @hidden */
 	private deferInitProducer() {
 		this.subscribeToInitialState((state) => {
 			this.producer = this.initProducer(this.state) as never;
 		});
 	}
 
-	/** @internal */
+	/** @internal @hidden */
 	private subscribeToInitialState(subscriber: (state: S) => void) {
 		const mt = (getmetatable(this) ?? {}) as LuaMetatable<ClassProducer>;
 
