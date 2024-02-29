@@ -136,7 +136,13 @@ export const CreatePatchBroadcaster = <S extends object>(options: PatchBroadcast
 					const nextState = dispatch(...args) as object;
 					pendingActionsByPlayer.forEach((actions, player) => {
 						let action = CreatePatchAction(currentState, nextState) as BroadcastAction;
-						action = (options.beforeDispatch?.(player, action) as BroadcastAction) ?? action;
+
+						if (options.beforeDispatch) {
+							const result = options.beforeDispatch(player, action);
+							if (result === undefined) return;
+							action = result;
+						}
+
 						actions.push(action);
 					});
 
