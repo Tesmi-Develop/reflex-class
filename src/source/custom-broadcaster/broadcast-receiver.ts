@@ -6,7 +6,7 @@ import { patchDifferences } from "../../utilities/patch-utilities";
 
 interface PatchBroadcastReceiverOptions extends BroadcastReceiverOptions {
 	readonly OnPatch?: (patch: object) => void;
-	readonly OnHydration?: () => void;
+	readonly OnHydration?: (state: object) => void;
 }
 
 export const createPatchBroadcastReceiver = (options: PatchBroadcastReceiverOptions) => {
@@ -23,7 +23,7 @@ export const createPatchBroadcastReceiver = (options: PatchBroadcastReceiverOpti
 		}
 
 		restoreNotChangedProperties(oldState, nextState);
-		options.OnHydration?.();
+		options.OnHydration?.(nextState);
 		producer.setState(nextState);
 	};
 
