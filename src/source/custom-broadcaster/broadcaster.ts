@@ -1,4 +1,4 @@
-import { BroadcastAction, BroadcasterOptions, Producer, ProducerMap, ProducerMiddleware } from "@rbxts/reflex";
+import { BroadcastAction, Producer, ProducerMiddleware } from "@rbxts/reflex";
 import { Players } from "@rbxts/services";
 import { setInterval } from "@rbxts/set-timeout";
 import { CreatePatchAction } from "./patch";

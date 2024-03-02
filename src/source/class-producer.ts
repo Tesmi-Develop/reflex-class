@@ -1,7 +1,7 @@
 import { Janitor } from "@rbxts/janitor";
 import { Producer, ProducerImpl, ProducerMiddleware, createProducer } from "@rbxts/reflex";
 
-export type InferClassProducerState<T> = T extends ClassProducer<infer S> ? S : never;
+export type InferClassProducerState<T> = T extends IClassProducer<infer S> ? S : never;
 
 interface Actions {
 	Dispatch: (state: unknown, newState: unknown) => unknown;

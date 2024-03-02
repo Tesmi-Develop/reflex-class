@@ -4,7 +4,12 @@ import { IsHydrate } from "./hydrate";
 import { IsPatch } from "./patch";
 import { patchDifferences } from "../../utilities/patch-utilities";
 
-export const createPatchBroadcastReceiver = (options: BroadcastReceiverOptions) => {
+interface PatchBroadcastReceiverOptions extends BroadcastReceiverOptions {
+	readonly OnPatch?: (patch: object) => void;
+	readonly OnHydration?: () => void;
+}
+
+export const createPatchBroadcastReceiver = (options: PatchBroadcastReceiverOptions) => {
 	let producer: Producer<object>;
 
 	const hydrateState = (serverState: object) => {
@@ -18,6 +23,7 @@ export const createPatchBroadcastReceiver = (options: BroadcastReceiverOptions) 
 		}
 
 		restoreNotChangedProperties(oldState, nextState);
+		options.OnHydration?.();
 		producer.setState(nextState);
 	};
 
@@ -32,7 +38,10 @@ export const createPatchBroadcastReceiver = (options: BroadcastReceiverOptions) 
 
 				if (IsPatch(action)) {
 					const patch = action.arguments[0] as object;
-					next(patch) !== undefined && producer.setState(patchDifferences(producer.getState(), patch));
+					if (next(patch) !== undefined) {
+						producer.setState(patchDifferences(producer.getState(), patch));
+						options.OnPatch?.(table.clone(patch));
+					}
 				}
 			});
 		},
