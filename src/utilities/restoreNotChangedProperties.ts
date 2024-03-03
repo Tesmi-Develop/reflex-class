@@ -24,5 +24,5 @@ export function restoreNotChangedProperties<T extends object, C extends object>(
 
 	isDifferentObjects = isDifferentObjects ? isDifferentObjects : !clone.isEmpty();
 
-	return isDifferentObjects ? table2 : table1;
+	return isDifferentObjects ? table1 : table2;
 }

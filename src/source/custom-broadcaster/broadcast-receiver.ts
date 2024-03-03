@@ -16,13 +16,13 @@ export const createPatchBroadcastReceiver = (options: PatchBroadcastReceiverOpti
 		assert(producer, "Cannot use broadcast receiver before the middleware is applied.");
 
 		const oldState = producer.getState();
-		const nextState = table.clone(oldState);
+		let nextState = table.clone(oldState);
 
 		for (const [key, value] of pairs(serverState)) {
 			nextState[key as never] = value as never;
 		}
 
-		restoreNotChangedProperties(oldState, nextState);
+		nextState = restoreNotChangedProperties(nextState, oldState);
 		options.OnHydration?.(nextState);
 		producer.setState(nextState);
 	};
