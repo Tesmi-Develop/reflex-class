@@ -91,11 +91,13 @@ export abstract class ClassProducer<S extends object = object> implements IClass
 	/** @internal @hidden */
 	private subscribeToInitialState(subscriber: (state: S) => void) {
 		const mt = (getmetatable(this) ?? {}) as LuaMetatable<ClassProducer>;
+		const originalNewIndex = mt.__newindex;
 
 		mt.__newindex = (t, index, value) => {
+			originalNewIndex?.(t, index, value);
 			rawset(t, index, value);
 			if (index !== "state") return;
-			mt.__newindex = undefined;
+			mt.__newindex = originalNewIndex;
 			subscriber(value as S);
 		};
 	}
