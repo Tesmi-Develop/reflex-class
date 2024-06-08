@@ -64,13 +64,14 @@ export abstract class ClassProducer<S extends object = object> implements IClass
 
 	private initStateProperty() {
 		const mt = (getmetatable(this) ?? {}) as LuaMetatable<ClassProducer>;
-		const originalIndex = mt.__index as object;
 
-		mt.__index = (t, index) => {
-			if (index !== "state") return originalIndex[index as never];
+		setmetatable(this, {
+			__index: (t, index) => {
+				if (index !== "state") return mt[index as never];
 
-			return this.atom();
-		};
+				return this.atom();
+			},
+		});
 	}
 
 	/** @internal @hidden */
