@@ -15,13 +15,13 @@ export = () => {
 			state = initState;
 
 			public GetProducer() {
-				return this.producer;
+				return this.atom;
 			}
 		}
 
 		const inst = new TestClass1();
 		expect(inst.GetState()).to.equal(initState);
-		expect(initState).to.equal(inst.GetProducer().getState());
+		expect(initState).to.equal(inst.GetProducer()());
 	});
 
 	it("Should invoke action", () => {

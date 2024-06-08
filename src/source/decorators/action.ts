@@ -1,4 +1,4 @@
-import { ClassProducer, IClassProducer } from "../class-producer";
+import { IClassProducer } from "../class-producer";
 
 /**
  * Decorator for creating an Action inside a class producer.

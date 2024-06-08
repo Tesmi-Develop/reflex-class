@@ -1,23 +1,14 @@
+import { atom, Atom, subscribe } from "@rbxts/charm";
 import { Janitor } from "@rbxts/janitor";
-import { Producer, ProducerImpl, ProducerMiddleware, createProducer } from "@rbxts/reflex";
 
 export type InferClassProducerState<T> = T extends IClassProducer<infer S> ? S : never;
-
-interface Actions {
-	Dispatch: (state: unknown, newState: unknown) => unknown;
-}
 
 export interface IClassProducer<S extends object = object> {
 	GetState(): S;
 
 	Subscribe(listener: (state: S, previousState: S) => void): () => void;
 	Subscribe<T>(selector: (state: S) => T, listener: (state: T, previousState: T) => void): () => void;
-	Subscribe<T>(
-		selector: (state: S) => T,
-		predicate: ((state: T, previousState: T) => boolean) | undefined,
-		listener: (state: T, previousState: T) => void,
-	): () => void;
-	Subscribe<T>(...args: unknown[]): () => void;
+	Subscribe(...args: unknown[]): () => void;
 
 	Dispatch(newState: S): void;
 
@@ -26,7 +17,7 @@ export interface IClassProducer<S extends object = object> {
 
 export abstract class ClassProducer<S extends object = object> implements IClassProducer {
 	protected abstract state: S;
-	protected producer!: Producer<S>;
+	protected atom!: Atom<S>;
 	private __janitor = new Janitor();
 
 	constructor() {
@@ -39,18 +30,18 @@ export abstract class ClassProducer<S extends object = object> implements IClass
 
 	public Subscribe(listener: (state: S, previousState: S) => void): () => void;
 	public Subscribe<T>(selector: (state: S) => T, listener: (state: T, previousState: T) => void): () => void;
-	public Subscribe<T>(
-		selector: (state: S) => T,
-		predicate: ((state: T, previousState: T) => boolean) | undefined,
-		listener: (state: T, previousState: T) => void,
-	): () => void;
-	public Subscribe<T>(...args: unknown[]) {
-		const [listener, predicate, selector] = args;
-		return this.producer.subscribe(listener as never, predicate as never, selector as never);
+	public Subscribe(...args: unknown[]) {
+		if (args.size() === 1) {
+			const [listener] = args;
+			return subscribe(this.atom, listener as never);
+		}
+
+		const [selector, listener] = args as [(state: S) => unknown, (state: unknown, previousState: unknown) => void];
+		return subscribe(() => selector(this.atom()), listener as never);
 	}
 
 	public Dispatch(newState: S) {
-		return this.producer.Dispatch(newState);
+		return this.atom(newState);
 	}
 
 	/** @internal @hidden */
@@ -62,30 +53,24 @@ export abstract class ClassProducer<S extends object = object> implements IClass
 		this.__janitor.Destroy();
 	}
 
-	private initProducer(state: S) {
-		const middlewareUpdateState: ProducerMiddleware = () => {
-			return (nextAction, actionName) => {
-				return (...args) => {
-					const newState = nextAction(...args);
-					this.state = newState as S;
-					return newState;
-				};
-			};
-		};
-
-		const producer = createProducer(state, {
-			Dispatch: (state: S, newState: S) => newState,
-		}) as ProducerImpl<S, Actions>;
-		producer.applyMiddleware(middlewareUpdateState);
-
-		return producer;
-	}
-
 	/** @internal @hidden */
 	private deferInitProducer() {
 		this.subscribeToInitialState((state) => {
-			this.producer = this.initProducer(this.state) as never;
+			this.state = undefined as never;
+			this.atom = atom(state);
+			this.initStateProperty();
 		});
+	}
+
+	private initStateProperty() {
+		const mt = (getmetatable(this) ?? {}) as LuaMetatable<ClassProducer>;
+		const originalIndex = mt.__index as object;
+
+		mt.__index = (t, index) => {
+			if (index !== "state") return originalIndex[index as never];
+
+			return this.atom();
+		};
 	}
 
 	/** @internal @hidden */
