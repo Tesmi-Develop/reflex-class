@@ -87,4 +87,34 @@ export = () => {
 
 		expect(isInvoked).to.equal(true);
 	});
+
+	it("Should correct work state property", () => {
+		interface ITestState {
+			a: number;
+			b: number;
+		}
+
+		const initState: ITestState = {
+			a: 1,
+			b: 1,
+		};
+
+		class TestClass extends ClassProducer<ITestState> {
+			protected state = initState;
+
+			@Action()
+			public Patch() {
+				return {
+					...this.state,
+					a: this.state.a + 1,
+				};
+			}
+		}
+
+		const inst = new TestClass();
+		inst.Patch();
+		inst.Patch();
+		inst.Patch();
+		expect(inst.GetState().a).to.equal(4);
+	});
 };

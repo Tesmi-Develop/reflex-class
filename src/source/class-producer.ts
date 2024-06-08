@@ -56,22 +56,17 @@ export abstract class ClassProducer<S extends object = object> implements IClass
 	/** @internal @hidden */
 	private deferInitProducer() {
 		this.subscribeToInitialState((state) => {
-			this.state = undefined as never;
 			this.atom = atom(state);
-			this.initStateProperty();
+			this.initStateUpdate();
 		});
 	}
 
-	private initStateProperty() {
-		const mt = (getmetatable(this) ?? {}) as LuaMetatable<ClassProducer>;
-
-		setmetatable(this, {
-			__index: (t, index) => {
-				if (index !== "state") return mt[index as never];
-
-				return this.atom();
-			},
-		});
+	private initStateUpdate() {
+		this.__janitor.Add(
+			subscribe(this.atom, (state) => {
+				this.state = state;
+			}),
+		);
 	}
 
 	/** @internal @hidden */
