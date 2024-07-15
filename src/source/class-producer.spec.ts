@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /// <reference types="@rbxts/testez/globals" />
 
 import { ClassProducer } from "./class-producer";
@@ -11,7 +12,7 @@ export = () => {
 			b: 2,
 		};
 
-		class TestClass1 extends ClassProducer {
+		class TestClass1 extends ClassProducer<any> {
 			state = initState;
 
 			public GetProducer() {

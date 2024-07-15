@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ClassProducer, IClassProducer, InferClassProducerState } from "../class-producer";
 
 export const Subscribe = <T extends IClassProducer<InferClassProducerState<T>>, R>(
@@ -14,7 +15,7 @@ export const Subscribe = <T extends IClassProducer<InferClassProducerState<T>>, 
 
 		Ttarget.constructor = function (this, ...args: unknown[]) {
 			const result = originalConstructor(this as never, ...args);
-			const typedClass = this as unknown as ClassProducer;
+			const typedClass = this as unknown as ClassProducer<any>;
 			typedClass.__GetJanitor().Add(this.Subscribe(selector, (state, prev) => originalMethod(this, state, prev)));
 
 			return result;
