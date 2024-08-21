@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/reflex-class",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -36,7 +36,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@rbxts/charm": "^0.5.0",
+    "@rbxts/charm": "^0.6.0",
     "@rbxts/immut": "^0.4.4-ts.0",
     "@rbxts/janitor": "^1.15.7-ts.0",
     "@rbxts/services": "^1.5.4",
