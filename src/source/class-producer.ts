@@ -19,6 +19,7 @@ export abstract class ClassProducer<S> implements IClassProducer<S> {
 	protected abstract state: S;
 	protected atom!: Atom<S>;
 	private __janitor = new Janitor();
+	private listeners = new Set<() => void>();
 
 	constructor() {
 		this.deferInitProducer();
@@ -33,11 +34,23 @@ export abstract class ClassProducer<S> implements IClassProducer<S> {
 	public Subscribe(...args: unknown[]) {
 		if (args.size() === 1) {
 			const [listener] = args;
-			return subscribe(this.atom, listener as never);
+			const unsubscribe = subscribe(this.atom, listener as never);
+			this.listeners.add(unsubscribe);
+
+			return () => {
+				unsubscribe();
+				this.listeners.delete(unsubscribe);
+			};
 		}
 
 		const [selector, listener] = args as [(state: S) => unknown, (state: unknown, previousState: unknown) => void];
-		return subscribe(() => selector(this.atom()), listener as never);
+		const unsubscribe = subscribe(() => selector(this.atom()), listener as never);
+		this.listeners.add(unsubscribe);
+
+		return () => {
+			unsubscribe();
+			this.listeners.delete(unsubscribe);
+		};
 	}
 
 	public Dispatch(newState: S) {
@@ -51,6 +64,7 @@ export abstract class ClassProducer<S> implements IClassProducer<S> {
 
 	public Destroy() {
 		this.__janitor.Destroy();
+		this.listeners.forEach((unsubscribe) => unsubscribe());
 	}
 
 	/** @internal @hidden */
